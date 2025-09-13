@@ -1,0 +1,61 @@
+# python compiled files
+*.py[cod]
+__pycache__/
+*.so
+
+# virtual environment
+venv/
+env/
+ENV/
+.venv/
+
+# django stuff
+*.sqlite3
+*.log
+*.pot
+*.pyc
+*.pyo
+*.pyd
+*.db
+*.DS_Store
+db.sqlite3
+media/
+staticfiles/
+
+# env
+.env
+.env.*
+
+# ide/editor
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# coverage
+htmlcov/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+
+# pytest
+.pytest_cache/
+.pytest_cache/*
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# celery
+celerybeat-schedule
+celerybeat.pid
+
+# system
+*.swp
+*.bak
+*.tmp
