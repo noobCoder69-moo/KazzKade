@@ -23,7 +23,7 @@ KazzKade is a Django-based social media API inspired by platforms like Facebook.
 - User authentication -> `/register/`, `/login/`, `/logout/`
 - Global feed -> `/posts/` & `posts/:id/`
 - Comments -> `/posts/:id/comments/` & `/comments/:id`
-- `/likes/<object_id>/<content_type>/`
+- Likes -> `/likes/<object_id>/<content_type>/`
 
 # MIT License
 
