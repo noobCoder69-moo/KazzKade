@@ -39,6 +39,8 @@ class UserSerializer(serializers.ModelSerializer):
             return obj.followers.count()
         def get_following_count(self, obj):
             return obj.following.count()
+        
+        
 
 class PostSerializer(serializers.ModelSerializer):
     user = serializers.StringRelatedField(read_only=True)

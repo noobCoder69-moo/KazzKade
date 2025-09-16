@@ -2,7 +2,7 @@ from rest_framework.response import Response
 from rest_framework.decorators import permission_classes, api_view
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from django.contrib.auth import authenticate, login, logout
-from .serializers import RegisterSerializer, PostSerializer, CommentSerializer, LikeSerializer
+from .serializers import RegisterSerializer, PostSerializer, CommentSerializer, LikeSerializer, UserSerializer
 from django.contrib.auth import get_user_model
 from rest_framework import status
 from django.views.decorators.csrf import csrf_exempt
@@ -176,3 +176,36 @@ def like_view(request, content_type, object_id):
             return Response({'message': 'unliked'}, status=status.HTTP_200_OK)
         except Like.DoesNotExist:
             return Response({'message' : 'like not found'}, status=status.HTTP_404_NOT_FOUND)
+        
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def profile_view(request, user_id):
+    try:
+        user = User.objects.get(id=user_id)
+
+    except User.DoesNotExist:
+        return Response({'message' : 'User does not exist'}, status=status.HTTP_404_NOT_FOUND)
+    
+
+    serializer = UserSerializer(user)
+    return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def follow_toggle(request, user_id):
+    try: 
+        target = User.objects.get(id=user_id)
+    except User.DoesNotExist:
+        return Response({'message' : 'User does not exist'}, status=status.HTTP_404_NOT_FOUND)
+    
+    if request.data == target:
+        return Response({'message' : 'You cannot follow yourself'}, status=status.HTTP_400_BAD_REQUEST)
+    
+    if request.user in target.followers.all():
+        target.followers.remove(request.user)
+        return Response({'message' : 'Unfollowed'}, status=status.HTTP_200_OK)
+    else:
+        target.followers.add(request.user)  
+        return Response({'message' : 'Followed'}, status=status.HTTP_200_OK)
