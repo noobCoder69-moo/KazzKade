@@ -10,11 +10,19 @@ class CustomUser(AbstractUser):
 
     email = models.EmailField(unique=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    bio = models.TextField(blank=True, null=True)
+    followers = models.ManyToManyField(
+        'self', related_name='following', symmetrical=False, blank=True
+    )
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username']
 
     def __str__(self):
         return self.username
+    def followers_count(self):
+        return self.followers.count()
+    def following_count(self):
+        return self.following.all().count
     
 
 class Post(models.Model):

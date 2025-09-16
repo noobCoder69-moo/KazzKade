@@ -22,6 +22,23 @@ class RegisterSerializer(serializers.ModelSerializer):
         user.set_password(validated_data["password"])  
         user.save()
         return user
+    
+class UserSerializer(serializers.ModelSerializer):
+    followers_count = serializers.SerializerMethodField()
+    following_count = serializers.SerializerMethodField()
+    posts = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
+
+    class Meta:
+        model = User
+        fields = [
+            "id", "username", "email", "bio", "first_name", "last_name",
+            "followers_count", "following_count", "posts"
+        ]
+        
+        def get_follower_count(self, obj):
+            return obj.followers.count()
+        def get_following_count(self, obj):
+            return obj.following.count()
 
 class PostSerializer(serializers.ModelSerializer):
     user = serializers.StringRelatedField(read_only=True)
