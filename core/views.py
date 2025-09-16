@@ -70,7 +70,10 @@ def logout_view(request):
 @permission_classes([IsAuthenticated])
 def post_view(request):
     if request.method == 'GET':
-        posts = Post.objects.all().order_by('-created_at')
+        following_users = request.user.following.all()
+        following_posts = Post.objects.filter(user__in=following_users).order_by('-created_at')
+        other_posts = Post.objects.exclude(user__in=following_users).order_by('-created_at')
+        posts = list(following_posts) + list(other_posts)
         serializer = PostSerializer(posts, many=True)
         return Response(serializer.data)
     
