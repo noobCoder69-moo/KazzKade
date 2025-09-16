@@ -10,7 +10,6 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from .models import Post, Comment, Like
 from django.contrib.contenttypes.models import ContentType
 
-from .permissions import IsOwnerOrReadOnly
 
 
 User = get_user_model()
@@ -41,7 +40,7 @@ def login_view(request):
             key='access_token',
             httponly=True,
             value=access_token,
-            secure=False,
+            secure=True,
             samesite='Strict',
         )
         login(request, user)
@@ -52,11 +51,17 @@ def login_view(request):
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def logout_view(request):
-    logout(request)
-    response = Response({'message' : 'User has been logged out'}, status=status.HTTP_200_OK)
-    response.delete_cookie('access_token')
-    return response
-
+        
+        try:
+            refresh_token = request.data['refresh']
+            token = RefreshToken(refresh_token)
+            token.blacklist()
+        except Exception:
+            return Response({'message': 'invalid refresh token' }, status=status.HTTP_400_BAD_REQUEST)
+        
+        response = Response({'message' : 'Logged out.'}, status=status.HTTP_200_OK)
+        response.delete_cookie('access_token')
+        return response
 
 
 #after logging in
@@ -78,7 +83,7 @@ def post_view(request):
 
 
 @api_view(['GET', 'PUT', 'DELETE'])
-@permission_classes([IsAuthenticated, IsOwnerOrReadOnly])
+@permission_classes([IsAuthenticated])
 def post_detail(request, post_id):
     try:
         posts = Post.objects.get(id=post_id)
@@ -122,7 +127,7 @@ def comment_view(request, post_id):
     
 
 @api_view(['GET', 'PUT', 'DELETE'])
-@permission_classes([IsAuthenticated, IsOwnerOrReadOnly])
+@permission_classes([IsAuthenticated])
 def comment_details(request, comment_id):
     try:
         comment = Comment.objects.get(id=comment_id)
@@ -139,7 +144,7 @@ def comment_details(request, comment_id):
     elif request.method == 'PUT':
         serializer = CommentSerializer(comment, data=request.data)
         if serializer.is_valid():
-            serializer.save()
+            serializer.save(user=request.user)
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
