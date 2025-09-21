@@ -157,29 +157,28 @@ def comment_details(request, comment_id):
         return Response(status=status.HTTP_200_OK)
     
 
-@api_view(['POST', 'DELETE'])
+@api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def like_view(request, content_type, object_id):
     try:
         model = Post if content_type == 'post' else Comment
         obj = model.objects.get(id=object_id)
     except model.DoesNotExist:
-        return Response({'error': 'post/comment does not exist'}, status=status.HTTP_404_NOT_FOUND)
-
-    if request.method == 'POST':
-        like, created = Like.objects.get_or_create(user=request.user, object_id=obj.id, content_type=ContentType.objects.get_for_model(obj) )
-        if not created:
-            return Response({'message': 'already liked'}, status=status.HTTP_200_OK)
-        serializer = LikeSerializer(like)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response({'message' : 'Post does not exist'}, status=status.HTTP_404_NOT_FOUND)
     
-    elif request.method == 'DELETE':
-        try:
-            like = Like.objects.get(object_id=obj.id, user=request.user, content_type=ContentType.objects.get_for_model(obj))
-            like.delete()
-            return Response({'message': 'unliked'}, status=status.HTTP_200_OK)
-        except Like.DoesNotExist:
-            return Response({'message' : 'like not found'}, status=status.HTTP_404_NOT_FOUND)
+    content_type_obj = ContentType.objects.get_for_model(obj)
+    like, created = Like.objects.get_or_create(
+        user=request.user, object_id=obj.id, content_type=content_type_obj
+    )
+    if not created:
+        like.delete()
+        action = 'unliked'
+    else:
+        action = 'liked'
+    
+    like_count = Like.objects.filter(object_id=obj.id, content_type=content_type_obj).count()
+
+    return Response({'action' : action, 'like_count' : like_count}, status=status.HTTP_200_OK)
         
 
 @api_view(['GET'])
