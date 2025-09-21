@@ -9,6 +9,7 @@ from django.views.decorators.csrf import csrf_exempt
 from rest_framework_simplejwt.tokens import RefreshToken
 from .models import Post, Comment, Like
 from django.contrib.contenttypes.models import ContentType
+from django.db.models import Q
 
 
 
@@ -235,3 +236,17 @@ def profile_detail(request):
     elif request.method == 'DELETE':
         user.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def search_view(request):
+    query = request.GET.get('q','')
+    if not query:
+        return Response({'message' : 'Query param q required'}, status=status.HTTP_400_BAD_REQUEST)
+    
+    users = User.objects.filter(
+        Q(username__icontains=query) | Q(first_name__icontains=query) | Q(last_name__icontains=query)
+    )
+    users = users.exclude(id=request.user.id)
+    info = UserSerializer(users, many=True)
+    return Response(info.data, status=status.HTTP_200_OK)

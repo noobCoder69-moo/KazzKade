@@ -24,4 +24,7 @@ urlpatterns = [
     # profile
     path("users/<int:user_id>/", views.profile_view, name="profile_view"),
     path("profile/", views.profile_detail, name="profile_detail"),  
+
+    #search
+    path("search/", views.search_view, name="search_view")
 ]
