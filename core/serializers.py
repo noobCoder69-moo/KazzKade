@@ -35,12 +35,16 @@ class UserSerializer(serializers.ModelSerializer):
             "followers_count", "following_count", "posts"
         ]
         
-        def get_follower_count(self, obj):
-            return obj.followers.count()
-        def get_following_count(self, obj):
-            return obj.following.count()
+    def get_followers_count(self, obj):
+        return obj.followers.count()
+    def get_following_count(self, obj):
+        return obj.following.count()
         
-        
+class UserUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ["username", "email", "bio", "first_name", "last_name"]
+
 
 class PostSerializer(serializers.ModelSerializer):
     user = serializers.StringRelatedField(read_only=True)

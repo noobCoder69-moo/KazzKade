@@ -18,9 +18,10 @@ urlpatterns = [
     # likes
     path("<str:content_type>/<int:object_id>/like/", views.like_view, name="like"),  
 
-    # follow
-    path("users/<int:user_id>/follow/", views.toggle_follow, name="toggle_follow"),
+    # follow toggle
+    path("users/<int:user_id>/follow/", views.follow_toggle, name="follow_toggle"),
 
-    #profile view
+    # profile
     path("users/<int:user_id>/", views.profile_view, name="profile_view"),
+    path("profile/", views.profile_detail, name="profile_detail"),  
 ]

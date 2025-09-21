@@ -2,7 +2,7 @@ from rest_framework.response import Response
 from rest_framework.decorators import permission_classes, api_view
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from django.contrib.auth import authenticate, login, logout
-from .serializers import RegisterSerializer, PostSerializer, CommentSerializer, LikeSerializer, UserSerializer
+from .serializers import RegisterSerializer, PostSerializer, CommentSerializer, LikeSerializer, UserSerializer, UserUpdateSerializer
 from django.contrib.auth import get_user_model
 from rest_framework import status
 from django.views.decorators.csrf import csrf_exempt
@@ -195,7 +195,7 @@ def profile_view(request, user_id):
     return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-@api_view(['GET'])
+@api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def follow_toggle(request, user_id):
     try: 
@@ -212,3 +212,26 @@ def follow_toggle(request, user_id):
     else:
         target.followers.add(request.user)  
         return Response({'message' : 'Followed'}, status=status.HTTP_200_OK)
+    
+@api_view(['GET', 'PUT', 'DELETE'])
+@permission_classes([IsAuthenticated])
+def profile_detail(request):
+
+    try:
+        user = request.user
+    except User.DoesNotExist:
+        return Response({'message' : 'User does not exist'}, status=status.HTTP_404_NOT_FOUND)
+
+    
+    if request.method == 'GET':
+        info = UserUpdateSerializer(user)
+        return Response(info.data, status=status.HTTP_200_OK)
+    elif request.method == 'PUT':
+        info = UserUpdateSerializer(user, data=request.data, partial=True)
+        if info.is_valid():
+            info.save()
+            return Response(info.data, status=status.HTTP_200_OK)
+        return Response(info.errors, status=status.HTTP_400_BAD_REQUEST)
+    elif request.method == 'DELETE':
+        user.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
