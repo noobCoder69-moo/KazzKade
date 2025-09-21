@@ -49,20 +49,22 @@ def login_view(request):
 
     return Response({'message' : 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
 
-@api_view(["POST"])
+@api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def logout_view(request):
-        
-        try:
-            refresh_token = request.data['refresh']
-            token = RefreshToken(refresh_token)
-            token.blacklist()
-        except Exception:
-            return Response({'message': 'invalid refresh token' }, status=status.HTTP_400_BAD_REQUEST)
-        
-        response = Response({'message' : 'Logged out.'}, status=status.HTTP_200_OK)
-        response.delete_cookie('access_token')
-        return response
+    refresh_token = request.data.get('refresh')
+    if not refresh_token:
+        return Response({'message': 'refresh token required'}, status=400)
+    
+    try:
+        token = RefreshToken(refresh_token)
+        token.blacklist()
+    except Exception:
+        return Response({'message': 'invalid refresh token'}, status=400)
+    
+    response = Response({'message': 'Logged out.'}, status=200)
+    response.delete_cookie('access_token')  # make sure name matches login cookie
+    return response
 
 
 #after logging in
