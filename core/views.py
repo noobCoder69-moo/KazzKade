@@ -54,15 +54,15 @@ def login_view(request):
 def logout_view(request):
     refresh_token = request.data.get('refresh')
     if not refresh_token:
-        return Response({'message': 'refresh token required'}, status=400)
+        return Response({'message': 'refresh token required'}, status=status.HTTP_400_BAD_REQUEST)
     
     try:
         token = RefreshToken(refresh_token)
         token.blacklist()
     except Exception:
-        return Response({'message': 'invalid refresh token'}, status=400)
+        return Response({'message': 'invalid refresh token'}, status=status.HTTP_400_BAD_REQUEST)
     
-    response = Response({'message': 'Logged out.'}, status=200)
+    response = Response({'message': 'Logged out.'}, status=status.HTTP_200_OK)
     response.delete_cookie('access_token')  
     return response
 
