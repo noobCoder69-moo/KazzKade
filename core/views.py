@@ -63,7 +63,7 @@ def logout_view(request):
         return Response({'message': 'invalid refresh token'}, status=400)
     
     response = Response({'message': 'Logged out.'}, status=200)
-    response.delete_cookie('access_token')  # make sure name matches login cookie
+    response.delete_cookie('access_token')  
     return response
 
 
